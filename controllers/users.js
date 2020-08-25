@@ -3,8 +3,16 @@ const bcrypt = require('bcryptjs');
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar, email } = req.body;
-  bcrypt.hash(req.body.password, 10)
-  .then(password => User.create({ name, about, avatar, email, password}))
+
+  User.findOne({ email })
+    .then((user) => {
+      if(user){
+        new Error('Данный пользователь присутсвует в базе')
+        }else{
+          bcrypt.hash(req.body.password, 10)
+        }
+      })
+    .then(password => User.create({ name, about, avatar, email, password}))
     .then((user) => res.send({ data: user }))
     .catch((err) => res.status(400).send({ message: err.message }));
 };
