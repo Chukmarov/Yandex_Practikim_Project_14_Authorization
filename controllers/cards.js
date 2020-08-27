@@ -17,16 +17,21 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
- if(req.user === req.owner){
+//  if(req.user === req.owner){
   Card.findById(req.params.cardid)
   .orFail(new Error('Данная карточка отсутсвует в базе'))
-  .then((cardid) => {
-    cardid.remove();
-    return res.send({ data: cardid });
+  .then((card) =>{
+    if(!(req.user._id === card.owner.toString())){
+      return Promise.reject(new Error('Невозможно удалять карточки других пользователей'));
+    }
+    return card;
+  })
+  .then((card) => {
+    card.remove();
+    return res.send({ data: card });
   })
   .catch((err) => res.status(404).send({ message: err.message }));
- } else{
-  res.status(500).send({ message: 'Невозможно удалять карточки других пользователей' })
- }
-
+//  } else{
+//   res.status(500).send({ message: 'Невозможно удалять карточки других пользователей' })
+//  }
 };

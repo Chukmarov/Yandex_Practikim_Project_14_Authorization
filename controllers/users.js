@@ -7,10 +7,9 @@ module.exports.createUser = (req, res) => {
   User.findOne({ email })
     .then((user) => {
       if(user){
-        new Error('Данный пользователь присутсвует в базе')
-        }else{
-          bcrypt.hash(req.body.password, 10)
+        return Promise.reject(new Error('Данный пользователь присутсвует в базе'));
         }
+        return bcrypt.hash(req.body.password, 10)
       })
     .then(password => User.create({ name, about, avatar, email, password}))
     .then((user) => res.send({ data: user }))
