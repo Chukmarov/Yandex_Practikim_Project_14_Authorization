@@ -1,19 +1,31 @@
-const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const User = require('../models/user');
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar, email } = req.body;
+  const {
+    name, about, avatar, email,
+  } = req.body;
 
-  User.findOne({ email })
-    .then((user) => {
-      if(user){
-        return Promise.reject(new Error('Данный пользователь присутсвует в базе'));
-        }
-        return bcrypt.hash(req.body.password, 10)
-      })
-    .then(password => User.create({ name, about, avatar, email, password}))
+  new Promise((resolve, reject) => {
+    if (req.body.password === '') {
+      reject(new Error('Поле password является обязательным'));
+    }
+    resolve(bcrypt.hash(req.body.password, 10));
+  })
+    .then((password) => {
+      User.create({
+        name, about, avatar, email, password,
+      });
+    })
+    .then(() => User.findOne({ email }))
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(409).send({ message: err.message });
+      } else {
+        res.status(400).send({ message: err.message });
+      }
+    });
 };
 
 module.exports.getUsers = (req, res) => {
