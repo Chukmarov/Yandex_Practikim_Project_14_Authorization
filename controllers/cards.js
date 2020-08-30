@@ -7,7 +7,13 @@ module.exports.createCard = (req, res) => {
     name, link, owner: req.user._id, likes,
   })
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: 'Проверьте пожалуйста правильность введеных данных' });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
+    });
 };
 
 module.exports.getCards = (req, res) => {
@@ -21,20 +27,22 @@ module.exports.deleteCard = (req, res) => {
     .orFail()
     .then((card) => {
       if (!(req.user._id === card.owner.toString())) {
-        return Promise.reject(new Error('RightsError'));
+        const err = new Error('Невозможно удалять карточки других пользователей');
+        err.name = 'RightsError';
+        return Promise.reject(err);
       }
       return card;
     })
     .then((card) => {
-      card.remove();
+      Card.remove();
       return card;
     })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Пожалуйста проверьте правильность запроса и корретность введенных данных' });
-      } else if (err.message === 'RightsError') {
-        res.status(409).send({ message: 'Невозможно удалять карточки других пользователей' });
+      } else if (err.name === 'RightsError') {
+        res.status(403).send({ message: err.message });
       } else {
         res.status(404).send({ message: err.message });
       }
