@@ -33,18 +33,17 @@ module.exports.deleteCard = (req, res) => {
       }
       return card;
     })
-    .then((card) => {
-      Card.remove();
-      return card;
-    })
+    .then((card) => Card.findByIdAndRemove(card._id))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Пожалуйста проверьте правильность запроса и корретность введенных данных' });
       } else if (err.name === 'RightsError') {
         res.status(403).send({ message: err.message });
+      } else if (err.name === 'DocumentNotFoundError') {
+        res.status(404).send({ message: 'Карточка не найдена, либо была ранее удалена' });
       } else {
-        res.status(404).send({ message: err.message });
+        res.status(500).send({ message: err.message });
       }
     });
 };

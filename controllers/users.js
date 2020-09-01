@@ -6,25 +6,34 @@ module.exports.createUser = (req, res) => {
     name, about, avatar, email,
   } = req.body;
 
-  new Promise((resolve, reject) => {
-    if (req.body.password === undefined || req.body.password === '') {
-      const err = new Error('Вы пропустили поле password');
-      err.name = 'MissingPoleError';
-      reject(err);
-    }
-    resolve(bcrypt.hash(req.body.password, 10));
-  })
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        const err = new Error('Данный пользователь уже зарегистрирован в базе');
+        err.name = 'UserExist';
+        return Promise.reject(err);
+      }
+      if (req.body.password === undefined || req.body.password === '') {
+        const err = new Error('Вы пропустили поле password');
+        err.name = 'MissingFieldError';
+        return Promise.reject(err);
+      }
+      return (bcrypt.hash(req.body.password, 10));
+    })
     .then((password) => {
-      return User.create({
+      const user = User.create({
         name, about, avatar, email, password,
       });
+      return user;
     })
     .then(() => User.findOne({ email }))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
+        res.status(400).send({ message: err.message });
+      } else if (err.name === 'UserExist') {
         res.status(409).send({ message: err.message });
-      } else if (err.name === 'MissingPoleError') {
+      } else if (err.name === 'MissingFieldError') {
         res.status(400).send({ message: err.message });
       } else {
         res.status(500).send({ message: err.message });

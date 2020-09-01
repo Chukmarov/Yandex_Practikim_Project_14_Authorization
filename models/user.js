@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
-const uniqueValidator = require('mongoose-unique-validator');
 
 const userSchema = new mongoose.Schema({
 
@@ -37,7 +36,6 @@ const userSchema = new mongoose.Schema({
       },
     },
     required: true,
-    unique: true,
   },
 
   password: {
@@ -63,7 +61,5 @@ userSchema.statics.findUserByCredentials = function (email, password) {
         });
     });
 };
-
-userSchema.plugin(uniqueValidator, { message: 'Данный пользователь уже присутвует в базе, пожалуйста авторизируйтесь' });
 
 module.exports = mongoose.model('user', userSchema);
