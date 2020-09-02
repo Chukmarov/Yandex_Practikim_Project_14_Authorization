@@ -1,5 +1,5 @@
 {
-  "name": "project-12",
+  "name": "project-14",
   "version": "1.0.0",
   "description": "studing to build server in YandexPraktikum\r ver 0.0.2",
   "main": "index.js",
@@ -9,11 +9,13 @@
   },
   "author": "Roman Chukmarov",
   "license": "ISC",
-  "homepage": "https://github.com/Chukmarov/Chukmarov.github.io-YandexPraktikum_Project12_ServerFoundation",
+  "homepage": "https://github.com/Chukmarov/Yandex_Practikim_Project_14_Authorization",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "helmet": "^4.0.0",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.28",
     "validator": "^13.1.1"
   },
